@@ -1,7 +1,11 @@
 #ifndef CPROCESS_H
 #define CPROCESS_H
 
+#include <iostream>
+#include <string>
 #include "record.h"
+
+using namespace std;
 
 class CProcess
 {

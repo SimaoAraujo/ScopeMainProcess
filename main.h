@@ -16,10 +16,14 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#include <iostream>
+#include <string>
 #include <mqueue.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include <scope.h>
+#include "scope.h"
+
+using namespace std;
 
 /****************************Thread identifier*****************************/
 

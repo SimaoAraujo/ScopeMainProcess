@@ -13,12 +13,7 @@
  *                                                                                                       *
 \*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*/
 
-
-#include <iostream>
-
-#include "scope.h"
-
-using namespace std;
+#include "main.h"
 
 int main()
 {

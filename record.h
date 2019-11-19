@@ -2,9 +2,12 @@
 #define CRECORD_H
 
 #include <iostream>
+#include <string>
 #include "image.h"
 #include "text.h"
 #include "audio.h"
+
+using namespace std;
 
 class CRecord
 {
