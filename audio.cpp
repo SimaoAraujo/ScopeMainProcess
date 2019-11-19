@@ -1,3 +1,4 @@
+#include <iostream>
 #include "audio.h"
 
 CAudio::CAudio()

@@ -4,3 +4,8 @@ CProcess::CProcess()
 {
 
 }
+
+CRecord CProcess::getRecord()
+{
+    return oRecord;
+}

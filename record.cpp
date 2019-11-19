@@ -1,6 +1,6 @@
 #include "record.h"
 
-CRecord::CRecord()
+CRecord::CRecord() : oImage(), oText(), oAudio()
 {
 
 }
