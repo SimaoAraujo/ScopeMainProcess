@@ -18,7 +18,7 @@ public:
 private:
     CProcess oProcess;
     CButton oButtons;
-    CCamera oCamera;
+//    CCamera oCamera;
     CEarphone oEarphone;
 };
 

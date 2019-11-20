@@ -17,13 +17,27 @@
 
 int main()
 {
-    CScope* oScope = CScope::getInstance();
+    system("/etc/init.d/initOS.sh");
 
-    oScope->initMigSensors();
-    oScope->initSemaphores();
-    oScope->initMutexs();
-    oScope->initSignal();
-    oScope->fRun(); //only use the first letter in tasks of daemon functions???
+    CImage *newImage = new CImage();
+    CCamera oCamera(0, newImage);
 
-    pthread_exit(NULL);
+    if(oCamera.captureFrame())
+    {
+        cout << "Image Captured and Saved!" << endl;
+    }
+    else
+    {
+        cout << "Error!" << endl;
+    }
+
+//    CScope* oScope = CScope::getInstance();
+
+//    oScope->initMigSensors();
+//    oScope->initSemaphores();
+//    oScope->initMutexs();
+//    oScope->initSignal();
+//    oScope->fRun(); //only use the first letter in tasks of daemon functions???
+
+//    pthread_exit(NULL);
 }

@@ -12,10 +12,18 @@ using namespace cv;
 class CCamera
 {
 public:
-    CCamera();
-    CImage fTakeImage();
+    CCamera(int, CImage*);
+    ~CCamera();
+    void config(void);
+    bool open(void);
+    void close(void);
+    bool isOpened(void);
+    bool captureFrame(void);
+    void saveFrame(void);
 private:
-    CImage oImage;
+    VideoCapture videoCapture;
+    int cameraId;
+    CImage *pImage;
 };
 
 #endif // CCAMERA_H

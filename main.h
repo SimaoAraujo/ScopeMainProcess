@@ -22,6 +22,8 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include "scope.h"
+#include "image.h"
+#include "camera.h"
 
 using namespace std;
 
