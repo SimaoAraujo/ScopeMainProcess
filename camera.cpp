@@ -15,8 +15,8 @@ void CCamera::config()
     videoCapture.set(CV_CAP_PROP_FRAME_WIDTH ,640);
     videoCapture.set(CV_CAP_PROP_FRAME_HEIGHT,480);
     videoCapture.set(CV_CAP_PROP_BRIGHTNESS, 100);
-    videoCapture.set(CV_CAP_PROP_EXPOSURE, 30);
-    videoCapture.set(CV_CAP_PROP_CONTRAST, 10);
+    videoCapture.set(CV_CAP_PROP_EXPOSURE, 20);
+    videoCapture.set(CV_CAP_PROP_CONTRAST, 0);
     videoCapture.set(CV_CAP_PROP_SATURATION, 0);
 }
 

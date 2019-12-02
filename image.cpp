@@ -24,7 +24,7 @@ void CImage::newInstance(Mat &newImage)
 
 void CImage::saveNewInstance()
 {
-    /* save image in Rpi directory: "/etc/" as "testCamera.jpeg" */
+    cvtColor(image,image,CV_BGR2GRAY);
+    /* save image in Rpi directory: "/etc" as "testCamera.jpeg" */
     imwrite("/etc/testCamera.jpeg", image);
 }
-

@@ -17,7 +17,10 @@
 
 int main()
 {
-    system("/etc/init.d/initOS.sh");
+    CScope *Scope = new CScope();
+
+    Scope->config();
+    Scope->run();
 
     CImage *newImage = new CImage();
     CCamera oCamera(0, newImage);
@@ -30,14 +33,4 @@ int main()
     {
         cout << "Error!" << endl;
     }
-
-//    CScope* oScope = CScope::getInstance();
-
-//    oScope->initMigSensors();
-//    oScope->initSemaphores();
-//    oScope->initMutexs();
-//    oScope->initSignal();
-//    oScope->fRun(); //only use the first letter in tasks of daemon functions???
-
-//    pthread_exit(NULL);
 }
