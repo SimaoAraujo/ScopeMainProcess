@@ -1,5 +1,19 @@
 #include "camera.h"
 
+CCamera* CCamera::instance = nullptr;
+
+CCamera* CCamera::getInstance()
+{
+    if(!instance)
+        instance = new CCamera();
+    return instance;
+}
+
+CCamera::CCamera()
+{
+    config();
+}
+
 CCamera::CCamera(int id, CImage *oImage): cameraId(id), pImage(oImage)
 {
     config();

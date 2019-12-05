@@ -10,9 +10,14 @@ using namespace std;
 class CEarphone
 {
 public:
-    CEarphone();
+    static CEarphone* getInstance();
+    static void *tAdjustVolume(void*);
 private:
+    static CEarphone *instance;
     CAudio oAudio;
+
+    CEarphone();
+    ~CEarphone();
 };
 
-#endif // CEARPHONE_H
+#endif

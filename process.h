@@ -10,10 +10,14 @@ using namespace std;
 class CProcess
 {
 public:
-    CProcess();
-    CRecord getRecord();
+    static CProcess *getInstance();
+    CRecord* getCRecord();
 private:
-    CRecord oRecord;
+    static CProcess *instance;
+    static CRecord *oRecord;
+
+    CProcess();
+    ~CProcess();
 };
 
-#endif // CPROCESS_H
+#endif

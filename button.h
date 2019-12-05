@@ -9,7 +9,12 @@ using namespace std;
 class CButton
 {
 public:
+    static CButton *getInstance();
+private:
+    static CButton *instance;
+
     CButton();
+    ~CButton();
 };
 
-#endif // CBUTTON_H
+#endif

@@ -10,6 +10,8 @@ class CText
 {
 public:
     CText();
+    ~CText();
+    static void* tAssembleText(void*);
 };
 
-#endif // CTEXT_H
+#endif

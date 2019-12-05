@@ -28,3 +28,27 @@ void CImage::saveNewInstance()
     /* save image in Rpi directory: "/etc" as "testCamera.jpeg" */
     imwrite("/etc/testCamera.jpeg", image);
 }
+
+void *CImage::tAcquireImage(void *ptr)
+{
+    while (1)
+    {
+        cout << "Arrived at: tAcquireImage" << endl;
+    }
+}
+
+void *CImage::tDetectCharacter(void *ptr)
+{
+    while (1)
+    {
+        cout << "Arrived at: tDetectCharacter" << endl;
+    }
+}
+
+void *CImage::tRecognizeCharacter(void *ptr)
+{
+    while (1)
+    {
+        cout << "Arrived at: tRecognizeCharacter" << endl;
+    }
+}

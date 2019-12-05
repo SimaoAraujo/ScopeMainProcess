@@ -41,7 +41,7 @@ HEADERS += \
     scope.h \
     text.h
 
-QMAKE_CXXFLAGS += -std=c++0x -pthread
+QMAKE_CXXFLAGS += -std=c++0x -pthread -lasound
 LIBS += -pthread -lrt -lpthread -lbcm2835
 
 CONFIG += link_pkgconfig

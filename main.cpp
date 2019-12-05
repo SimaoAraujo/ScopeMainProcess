@@ -17,20 +17,25 @@
 
 int main()
 {
-    CScope *Scope = new CScope();
+    CScope *Scope = CScope::getInstance();
 
-    Scope->config();
-    Scope->run();
-
-    CImage *newImage = new CImage();
-    CCamera oCamera(0, newImage);
-
-    if(oCamera.captureFrame())
-    {
-        cout << "Image Captured and Saved!" << endl;
-    }
+    if(!Scope->run())
+        cout << "Threads Executing Successfully." << endl;
     else
-    {
-        cout << "Error!" << endl;
-    }
+        cout << "ERROR: Threads unable to execute." << endl;
+
+    pthread_exit(nullptr);
+
+
+//    CImage *newImage = new CImage();
+//    CCamera oCamera(0, newImage);
+
+//    if(oCamera.captureFrame())
+//    {
+//        cout << "Image Captured and Saved!" << endl;
+//    }
+//    else
+//    {
+//        cout << "Error!" << endl;
+//    }
 }

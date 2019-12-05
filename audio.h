@@ -10,7 +10,10 @@ class CAudio
 {
 public:
     CAudio();
+    ~CAudio();
+    static void *tGenerateAudio(void*);
+private:
     string generateSound();
 };
 
-#endif // CAUDIO_H
+#endif

@@ -1,4 +1,4 @@
-#ifndef CCAMERA_H
+﻿#ifndef CCAMERA_H
 #define CCAMERA_H
 
 #include <iostream>
@@ -12,8 +12,8 @@ using namespace cv;
 class CCamera
 {
 public:
-    CCamera(int, CImage*);
-    ~CCamera();
+    static CCamera* getInstance();
+
     void config(void);
     bool open(void);
     void close(void);
@@ -21,9 +21,17 @@ public:
     bool captureFrame(void);
     void saveFrame(void);
 private:
+    static CCamera *instance;
+
     VideoCapture videoCapture;
     int cameraId;
     CImage *pImage;
+
+    /*********************CHECK CONSTRUCTOR************************/
+    /* Not receiving arguments because of Singleton Class! */
+    CCamera();
+    CCamera(int, CImage*);
+    ~CCamera();
 };
 
-#endif // CCAMERA_H
+#endif

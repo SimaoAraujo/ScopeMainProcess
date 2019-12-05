@@ -13,10 +13,14 @@ class CRecord
 {
 public:
     CRecord();
+    ~CRecord();
+    CImage* getCImage();
+    CText* getCText();
+    CAudio* getCAudio();
 private:
-    CImage      oImage;
-    CText       oText;
-    CAudio      oAudio;
+    static CImage *oImage;
+    static CText *oText;
+    static CAudio *oAudio;
 };
 
-#endif // CRECORD_H
+#endif

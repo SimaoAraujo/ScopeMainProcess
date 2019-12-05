@@ -16,40 +16,16 @@
 #include "scope.h"
 #include "image.h"
 #include "camera.h"
-
 #include <vector>
 
 using namespace std;
 
-/****************************Thread identifier*****************************/
-
-pthread_t tAcquireImage;
-pthread_t tDetectCharacter;
-pthread_t tRecognizeCharacter;
-pthread_t tAssembleText;
-pthread_t tGenerateAudio;
-pthread_t tAdjustVolume ;
-pthread_t tIdle ;
-
-/****************************Semaphore identifier**************************/
-
-sem_t semAcquireImage;
-sem_t semIncreaseVolume;
-sem_t semDecreaseVolume;
-sem_t semInterpretCharacter;
+pthread_t tAcquireImageID, tDetectCharacterID, tRecognizeCharacterID,
+    tAssembleTextID, tGenerateAudioID, tAdjustVolumeID, tIdleID;
+sem_t semAcquireImage, semIncreaseVolume, semDecreaseVolume, semInterpretCharacter;
 sem_t *semAccessAudio;
+pthread_mutex_t mutexImage, mutexFrame, mutexCharacters, mutexText, mutexAudio,
+    mutexIncrease, mutexDecrease, mutexAcquireDetect, mutexRecognizeAssemble,
+    mutexAssembleGenerate;
 
-/****************************Mutex identifier******************************/
-
-pthread_mutex_t mutexImage;
-pthread_mutex_t mutexFrame;
-pthread_mutex_t mutexCharacters;
-pthread_mutex_t mutexText;
-pthread_mutex_t mutexAudio;
-pthread_mutex_t mutexIncrease;
-pthread_mutex_t mutexDecrease;
-pthread_mutex_t mutexAcquireDetect;
-pthread_mutex_t mutexRecognizeAssemble;
-pthread_mutex_t mutexAssembleGenerate;
-
-#endif // MAIN_H
+#endif

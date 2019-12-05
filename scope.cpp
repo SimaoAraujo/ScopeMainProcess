@@ -1,31 +1,67 @@
 #include "scope.h"
 
+CScope* CScope::instance = nullptr;
+
+CScope* CScope::getInstance()
+{
+    if(!instance)
+        instance = new CScope();
+    return instance;
+}
+
+static CProcess *oProcess = CProcess::getInstance();
+static CButton *oButtons = CButton::getInstance();
+static CCamera *oCamera = CCamera::getInstance();
+static CEarphone *oEarphone = CEarphone::getInstance();
+
 CScope::CScope(): oProcess(), oButtons(), oCamera(), oEarphone()
 {
-    extern sem_t *semAccessAudio;
-
-    char shmName[] = "shmDaemon";
-    char semName[] = "semDaemon";
-
-    shm_open(shmName, O_CREAT|O_RDWR|O_TRUNC, S_IRWXU|S_IRWXG);
-    semAccessAudio = sem_open(semName, O_CREAT, 0644, 0);
-    sem_close(semAccessAudio);
-
-    system("/root/ScopeDaemonProcess");
-
+    //initObjects();
+    initSemaphores();
+    initMutexes();
+    initConditionVariables();
+    initSignal();
+    initSharedMemory();
 }
 
 CScope::~CScope()
+{
+    extern sem_t semAcquireImage, semIncreaseVolume, semDecreaseVolume, semInterpretCharacter;
+    extern sem_t *semAccessAudio;
+    extern pthread_mutex_t mutexImage, mutexFrame, mutexCharacters, mutexText, mutexAudio,
+        mutexIncrease, mutexDecrease, mutexAcquireDetect, mutexRecognizeAssemble,
+        mutexAssembleGenerate;
+
+    sem_destroy(&semAcquireImage);
+    sem_destroy(&semIncreaseVolume);
+    sem_destroy(&semDecreaseVolume);
+    sem_destroy(&semInterpretCharacter);
+    sem_destroy(semAccessAudio);
+    pthread_mutex_destroy(&mutexImage);
+    pthread_mutex_destroy(&mutexFrame);
+    pthread_mutex_destroy(&mutexCharacters);
+    pthread_mutex_destroy(&mutexText);
+    pthread_mutex_destroy(&mutexAudio);
+    pthread_mutex_destroy(&mutexIncrease);
+    pthread_mutex_destroy(&mutexDecrease);
+    pthread_mutex_destroy(&mutexAcquireDetect);
+    pthread_mutex_destroy(&mutexRecognizeAssemble);
+    pthread_mutex_destroy(&mutexAssembleGenerate);
+
+
+//    pthread_cond_destroy(&cond_new_rfid);
+
+    perror("CScope: Destructor Called!");
+}
+
+void CScope::initObjects()
 {
 
 }
 
 void CScope::initSemaphores()
 {
-    extern sem_t semAcquireImage;
-    extern sem_t semIncreaseVolume;
-    extern sem_t semDecreaseVolume;
-    extern sem_t semInterpretCharacter;
+    extern sem_t semAcquireImage, semIncreaseVolume, semDecreaseVolume, semInterpretCharacter;
 
     sem_init (&semAcquireImage, 0, 0);
     sem_init (&semIncreaseVolume, 0, 0);
@@ -38,16 +74,9 @@ void CScope::initSemaphores()
 
 void CScope::initMutexes()
 {
-    extern pthread_mutex_t mutexImage;
-    extern pthread_mutex_t mutexFrame;
-    extern pthread_mutex_t mutexCharacters;
-    extern pthread_mutex_t mutexText;
-    extern pthread_mutex_t mutexAudio;
-    extern pthread_mutex_t mutexIncrease;
-    extern pthread_mutex_t mutexDecrease;
-    extern pthread_mutex_t mutexAcquireDetect;
-    extern pthread_mutex_t mutexRecognizeAssemble;
-    extern pthread_mutex_t mutexAssembleGenerate;
+    extern pthread_mutex_t mutexImage, mutexFrame, mutexCharacters, mutexText, mutexAudio,
+        mutexIncrease, mutexDecrease, mutexAcquireDetect, mutexRecognizeAssemble,
+        mutexAssembleGenerate;
 
     mutexImage = PTHREAD_MUTEX_INITIALIZER;
     mutexFrame = PTHREAD_MUTEX_INITIALIZER;
@@ -59,6 +88,11 @@ void CScope::initMutexes()
     mutexAcquireDetect = PTHREAD_MUTEX_INITIALIZER;
     mutexRecognizeAssemble = PTHREAD_MUTEX_INITIALIZER;
     mutexAssembleGenerate = PTHREAD_MUTEX_INITIALIZER;
+}
+
+void CScope::initConditionVariables()
+{
+
 }
 
 void CScope::initSignal()
@@ -74,26 +108,39 @@ void CScope::initSignal()
     itv.it_value.tv_sec = 0;
     itv.it_value.tv_usec = 8000;
 
-    setitimer(ITIMER_REAL, &itv, NULL);	//ITIMER_REAL is for a SIGALRM
+    /* a SIGALRM is generated every 8ms */
+    setitimer(ITIMER_REAL, &itv, nullptr);
 
     /*********************** WHY???? *******************/
     return;
 }
 
+void CScope::initSharedMemory()
+{
+    extern sem_t *semAccessAudio;
+
+    char shmName[] = "shmDaemon";
+    char semName[] = "semDaemon";
+
+    shm_open(shmName, O_CREAT|O_RDWR|O_TRUNC, S_IRWXU|S_IRWXG);
+    semAccessAudio = sem_open(semName, O_CREAT, 0644, 0);
+    sem_close(semAccessAudio);
+
+    //system("/etc/ScopeDaemonProcess");
+}
+
 void CScope::ISR(int signal)
 {
-    extern sem_t semAcquireIMage;
-    extern sem_t semIncreaseVolume;
-    extern sem_t semDecreaseVolume;
+    extern sem_t semAcquireImage, semIncreaseVolume, semDecreaseVolume;
 
     static int count = 0;
+
     if(signal == SIGALRM)
     {
-        /* Post to the semaphore to sample the sensors */
         switch (++count)
         {
             case 1:
-                sem_post(&semAcquireIMage);
+                sem_post(&semAcquireImage);
                 break;
             case 2:
                 sem_post(&semIncreaseVolume);
@@ -108,66 +155,86 @@ void CScope::ISR(int signal)
     }
 }
 
-void CScope::configThread(uint8_t priority, pthread_attr_t *pthread_attr, sched_param *pthread_param)
+void *CScope::tIdle(void *ptr)
+{
+    while (1)
+    {
+        cout << "Arrived at: tIdle" << endl;
+    }
+}
+
+void CScope::setupThread(int priority, pthread_attr_t *pthread_attr, sched_param *pthread_param)
 {
     pthread_attr_setschedpolicy (pthread_attr, SCHED_RR);
     pthread_param->sched_priority = priority;
     pthread_attr_setschedparam (pthread_attr, pthread_param);
+    pthread_attr_setinheritsched (pthread_attr, PTHREAD_EXPLICIT_SCHED);
 }
 
-int CScope::initThreads()
+bool CScope::initThreads()
 {
-    int error_tDetectCharacter, error_tRecognizeCharacter, error_tAssembleText, error_tGenerateAudio, error_tAdjustVolume, error_tIdle;
-    extern pthread_t tDetectCharacter, tRecognizeCharacter, tAssembleText, tGenerateAudio, tAdjustVolume, tIdle;
-
-    CTouchMatrix *touch = CTouchMatrix::getInstance();
-    CHandSlideSensor *slideSensor = CHandSlideSensor::getInstance();
-    CDistanceSensor *distanceSensor =  CDistanceSensor::getInstance();
-    CGenerateSound generateSoundc;
-
+    extern pthread_t tAcquireImageID, tDetectCharacterID, tRecognizeCharacterID,
+        tAssembleTextID, tGenerateAudioID, tAdjustVolumeID, tIdleID;
+    int tAcquireImageRET, tDetectCharacterRET, tRecognizeCharacterRET, tAssembleTextRET,
+        tGenerateAudioRET, tAdjustVolumeRET, tIdleRET;
     int threadPolicy;
     pthread_attr_t threadAttr;
     struct sched_param threadParam;
+
+    initObjects();
 
     pthread_attr_init(&threadAttr);
     pthread_attr_getschedparam(&threadAttr, &threadParam);
     pthread_attr_getschedpolicy(&threadAttr, &threadPolicy);
 
-    /* define prioratie tTouch */
-    configThread(1, &threadAttr, &threadParam);
-    pthread_attr_setinheritsched (&threadAttr, PTHREAD_EXPLICIT_SCHED);
-    error_tDetectCharacter = pthread_create(&tDetectCharacter, &threadAttr, touch->tTouchFunction, NULL);
+    setupThread(1, &threadAttr, &threadParam);
+    tAcquireImageRET = pthread_create(&tAcquireImageID, nullptr, oProcess->getCRecord()->getCImage()->tAcquireImage, nullptr);
 
-    /* define prioratie tIRSensor */
-    configThread(2, &threadAttr, &threadParam);
-    pthread_attr_setinheritsched (&threadAttr, PTHREAD_EXPLICIT_SCHED);
-    error_tRecognizeCharacter = pthread_create(&tRecognizeCharacter, &threadAttr, distanceSensor->tIRSensorFunction, NULL);
+    setupThread(3, &threadAttr, &threadParam);
+    tDetectCharacterRET = pthread_create(&tDetectCharacterID, &threadAttr, oProcess->getCRecord()->getCImage()->tDetectCharacter, nullptr);
 
-    /* define prioratie tSlideSensor */
-    configThread(2, &threadAttr, &threadParam);
-    pthread_attr_setinheritsched (&threadAttr, PTHREAD_EXPLICIT_SCHED);
-    error_tAssembleText = pthread_create(&tAssembleText, &threadAttr, slideSensor->tSlideSensorFunction, NULL);
+    setupThread(3, &threadAttr, &threadParam);
+    tRecognizeCharacterRET = pthread_create(&tRecognizeCharacterID, &threadAttr, oProcess->getCRecord()->getCImage()->tRecognizeCharacter, nullptr);
 
-    /* define prioratie tSoundGenerater */
-    configThread(3, &threadAttr, &threadParam);
-    pthread_attr_setinheritsched (&threadAttr, PTHREAD_EXPLICIT_SCHED);
-    error_tGenerateAudio = pthread_create(&tGenerateAudio, &threadAttr, generateSoundc.tSoundGeneraterFunction, NULL);
+    setupThread(4, &threadAttr, &threadParam);
+    tAssembleTextRET = pthread_create(&tAssembleTextID, &threadAttr, oProcess->getCRecord()->getCText()->tAssembleText, nullptr);
 
-    /* define prioratie tSoundGenerater */
-    configThread(3, &threadAttr, &threadParam);
-    pthread_attr_setinheritsched (&threadAttr, PTHREAD_EXPLICIT_SCHED);
-    error_tAdjustVolume = pthread_create(&tAdjustVolume, &threadAttr, generateSoundc.tSoundGeneraterFunction, NULL);
+    setupThread(2, &threadAttr, &threadParam);
+    tGenerateAudioRET = pthread_create(&tGenerateAudioID, &threadAttr, oProcess->getCRecord()->getCAudio()->tGenerateAudio, nullptr);
 
-    /* define prioratie tSoundGenerater */
-    configThread(3, &threadAttr, &threadParam);
-    pthread_attr_setinheritsched (&threadAttr, PTHREAD_EXPLICIT_SCHED);
-    error_tIdle = pthread_create(&tIdle,&threadAttr,generateSoundc.tSoundGeneraterFunction,NULL);
+    setupThread(1, &threadAttr, &threadParam);
+    tAdjustVolumeRET = pthread_create(&tAdjustVolumeID, &threadAttr, oEarphone->tAdjustVolume, nullptr);
 
-    if((error_tDetectCharacter != 0)&&(error_tRecognizeCharacter != 0)&&(error_tAssembleText != 0)&&(error_tGenerateAudio != 0)&&(error_tAdjustVolume != 0)&&(error_tIdle != 0))
+    setupThread(5, &threadAttr, &threadParam);
+    tIdleRET = pthread_create(&tIdleID, &threadAttr, this->tIdle, nullptr);
+
+    if((tAcquireImageRET != 0)&&(tDetectCharacterRET != 0)&&(tRecognizeCharacterRET != 0)
+            &&(tAssembleTextRET != 0)&&(tGenerateAudioRET != 0)&&(tAdjustVolumeRET != 0)&&(tIdleRET != 0))
     {
-        perror("ERROR: Failed Creating Threads.");
-        return -1;
+        perror("ERROR: Failed Creating Thread.");
+        return 1;
     }
+    else
+        return 0;
+}
 
-    return 0;
+bool CScope::run()
+{
+    extern pthread_t tAcquireImageID, tDetectCharacterID, tRecognizeCharacterID,
+        tAssembleTextID, tGenerateAudioID, tAdjustVolumeID, tIdleID;
+
+    if(!initThreads())
+    {
+        pthread_join(tAcquireImageID, nullptr);
+        pthread_join(tDetectCharacterID, nullptr);
+        pthread_join(tRecognizeCharacterID, nullptr);
+        pthread_join(tAssembleTextID, nullptr);
+        pthread_join(tGenerateAudioID, nullptr);
+        pthread_join(tAdjustVolumeID, nullptr);
+        pthread_join(tIdleID, nullptr);
+
+        return 0;
+    }
+    else
+        return 1;
 }
