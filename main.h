@@ -24,7 +24,7 @@ pthread_t tAcquireImageID, tDetectCharacterID, tRecognizeCharacterID,
     tAssembleTextID, tGenerateAudioID, tAdjustVolumeID, tIdleID;
 sem_t semAcquireImage, semIncreaseVolume, semDecreaseVolume, semInterpretCharacter;
 sem_t *semAccessAudio;
-pthread_mutex_t mutexImage, mutexFrame, mutexCharacters, mutexText, mutexAudio,
+pthread_mutex_t mutexCamera, mutexImage, mutexFrame, mutexCharacters, mutexText, mutexAudio,
     mutexIncrease, mutexDecrease, mutexAcquireDetect, mutexRecognizeAssemble,
     mutexAssembleGenerate;
 

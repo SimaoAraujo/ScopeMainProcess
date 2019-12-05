@@ -9,14 +9,8 @@ CScope* CScope::getInstance()
     return instance;
 }
 
-static CProcess *oProcess = CProcess::getInstance();
-static CButton *oButtons = CButton::getInstance();
-static CCamera *oCamera = CCamera::getInstance();
-static CEarphone *oEarphone = CEarphone::getInstance();
-
-CScope::CScope(): oProcess(), oButtons(), oCamera(), oEarphone()
+CScope::CScope()
 {
-    //initObjects();
     initSemaphores();
     initMutexes();
     initConditionVariables();
@@ -47,16 +41,9 @@ CScope::~CScope()
     pthread_mutex_destroy(&mutexAcquireDetect);
     pthread_mutex_destroy(&mutexRecognizeAssemble);
     pthread_mutex_destroy(&mutexAssembleGenerate);
-
-
 //    pthread_cond_destroy(&cond_new_rfid);
 
     perror("CScope: Destructor Called!");
-}
-
-void CScope::initObjects()
-{
-
 }
 
 void CScope::initSemaphores()
@@ -181,14 +168,17 @@ bool CScope::initThreads()
     pthread_attr_t threadAttr;
     struct sched_param threadParam;
 
-    initObjects();
+    static CProcess *oProcess = CProcess::getInstance();
+    static CCamera *oCamera = CCamera::getInstance();
+    static CEarphone *oEarphone = CEarphone::getInstance();
+    //static CButton *oButtons = CButton::getInstance();
 
     pthread_attr_init(&threadAttr);
     pthread_attr_getschedparam(&threadAttr, &threadParam);
     pthread_attr_getschedpolicy(&threadAttr, &threadPolicy);
 
     setupThread(1, &threadAttr, &threadParam);
-    tAcquireImageRET = pthread_create(&tAcquireImageID, nullptr, oProcess->getCRecord()->getCImage()->tAcquireImage, nullptr);
+    tAcquireImageRET = pthread_create(&tAcquireImageID, nullptr, oCamera->tAcquireImage, nullptr);
 
     setupThread(3, &threadAttr, &threadParam);
     tDetectCharacterRET = pthread_create(&tDetectCharacterID, &threadAttr, oProcess->getCRecord()->getCImage()->tDetectCharacter, nullptr);

@@ -29,14 +29,6 @@ void CImage::saveNewInstance()
     imwrite("/etc/testCamera.jpeg", image);
 }
 
-void *CImage::tAcquireImage(void *ptr)
-{
-    while (1)
-    {
-        cout << "Arrived at: tAcquireImage" << endl;
-    }
-}
-
 void *CImage::tDetectCharacter(void *ptr)
 {
     while (1)

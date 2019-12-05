@@ -13,25 +13,19 @@ class CCamera
 {
 public:
     static CCamera* getInstance();
-
-    void config(void);
-    bool open(void);
-    void close(void);
-    bool isOpened(void);
-    bool captureFrame(void);
-    void saveFrame(void);
+    static void* tAcquireImage(void*);
 private:
     static CCamera *instance;
-
     VideoCapture videoCapture;
-    int cameraId;
-    CImage *pImage;
 
-    /*********************CHECK CONSTRUCTOR************************/
-    /* Not receiving arguments because of Singleton Class! */
     CCamera();
-    CCamera(int, CImage*);
     ~CCamera();
+    void config(void);
+    bool open(int);
+    void close(void);
+    bool isOpened(void);
+    bool capture(int);
+    void saveFrame(void);
 };
 
 #endif

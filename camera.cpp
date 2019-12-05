@@ -14,11 +14,6 @@ CCamera::CCamera()
     config();
 }
 
-CCamera::CCamera(int id, CImage *oImage): cameraId(id), pImage(oImage)
-{
-    config();
-}
-
 CCamera::~CCamera()
 {
     close();
@@ -34,7 +29,7 @@ void CCamera::config()
     videoCapture.set(CV_CAP_PROP_SATURATION, 0);
 }
 
-bool CCamera::open()
+bool CCamera::open(int cameraId)
 {
     return videoCapture.open(cameraId);
 }
@@ -49,22 +44,30 @@ bool CCamera::isOpened(void)
     return videoCapture.isOpened();
 }
 
-bool CCamera::captureFrame()
+bool CCamera::capture(int cameraId)
 {
     Mat frame;
+    CImage *oImage = new CImage();
 
-    open();
+    open(cameraId);
     if(isOpened())
     {
         videoCapture.read(frame);
-        pImage->newInstance(frame);
+        oImage->newInstance(frame);
         close();
         return true;
     }
     return false;
 }
 
-void CCamera::saveFrame()
+void *CCamera::tAcquireImage(void *ptr)
 {
+    extern pthread_mutex_t mutexCamera;
+    CCamera *oCamera = CCamera::getInstance();
 
+    pthread_mutex_lock(&mutexCamera);
+    oCamera->capture(0);
+    pthread_mutex_unlock(&mutexCamera);
+
+    /**************************** is it needed pthread_exit()? *********************************/
 }

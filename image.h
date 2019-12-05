@@ -16,7 +16,6 @@ public:
     ~CImage();
     void newInstance(Mat&);
     void saveNewInstance();
-    static void *tAcquireImage(void*);
     static void *tDetectCharacter(void*);
     static void *tRecognizeCharacter(void*);
 private:

@@ -26,15 +26,9 @@ public:
     bool run();
 private:
     static CScope *instance;
-    CProcess *oProcess;
-    CButton *oButtons;
-    CCamera *oCamera;
-    CEarphone *oEarphone;
-    CRecord *oRecord;
 
     CScope();
     ~CScope();
-    void initObjects();
     void initSemaphores();
     void initMutexes();
     void initConditionVariables();
