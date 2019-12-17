@@ -5,6 +5,7 @@
 #include <string>
 #include <opencv2/opencv.hpp>
 #include "image.h"
+#include "record.h"
 
 using namespace std;
 using namespace cv;
@@ -17,15 +18,12 @@ public:
 private:
     static CCamera *instance;
     VideoCapture videoCapture;
+    vector<CImage*> oImages;
 
     CCamera();
     ~CCamera();
     void config(void);
-    bool open(int);
-    void close(void);
-    bool isOpened(void);
     bool capture(int);
-    void saveFrame(void);
 };
 
 #endif

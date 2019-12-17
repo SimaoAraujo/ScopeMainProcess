@@ -16,7 +16,7 @@ CCamera::CCamera()
 
 CCamera::~CCamera()
 {
-    close();
+
 }
 
 void CCamera::config()
@@ -29,45 +29,44 @@ void CCamera::config()
     videoCapture.set(CV_CAP_PROP_SATURATION, 0);
 }
 
-bool CCamera::open(int cameraId)
-{
-    return videoCapture.open(cameraId);
-}
-
-void CCamera::close()
-{
-   videoCapture.release();
-}
-
-bool CCamera::isOpened(void)
-{
-    return videoCapture.isOpened();
-}
-
 bool CCamera::capture(int cameraId)
 {
-    Mat frame;
-    CImage *oImage = new CImage();
+    CRecord oRecord;
 
-    open(cameraId);
-    if(isOpened())
+    int recordCount = oRecord.create();
+    CImage *oImage = CImage::getInstance(recordCount);
+    Mat frame;
+
+    oImages.push_back(oImage);
+
+    videoCapture.open(cameraId);
+    if(videoCapture.isOpened())
     {
-        videoCapture.read(frame);
-        oImage->newInstance(frame);
-        close();
+        if(videoCapture.read(frame))
+            oImage->save(frame);
+        else
+            cout << "ERROR Capturing Frame!" << endl;
+
+        videoCapture.release();
         return true;
     }
-    return false;
+    else
+    {
+        cout << "ERROR Opening Camera!" << endl;
+        return false;
+    }
 }
 
-void *CCamera::tAcquireImage(void *ptr)
+void* CCamera::tAcquireImage(void *ptr)
 {
     extern pthread_mutex_t mutexCamera;
-    CCamera *oCamera = CCamera::getInstance();
+    extern sem_t semInterpretCharacter;
 
+    //sem_wait(&semInterpretCharacter);
     pthread_mutex_lock(&mutexCamera);
-    oCamera->capture(0);
+    CCamera::getInstance()->capture(0);
     pthread_mutex_unlock(&mutexCamera);
+    //sem_post(&semInterpretCharacter);
 
-    /**************************** is it needed pthread_exit()? *********************************/
+    pthread_exit(nullptr);
 }

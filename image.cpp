@@ -1,13 +1,19 @@
 #include "image.h"
 
-CImage::CImage()
-{
+CImage* CImage::instance = nullptr;
 
+CImage* CImage::getInstance(int recordCount)
+{
+    if(!instance)
+        instance = new CImage(recordCount);
+    return instance;
 }
 
-CImage::CImage(Mat *image)
+int CImage::recordCount = 0;
+
+CImage::CImage(int recordCount)
 {
-    this->image = *image;
+    CImage::recordCount = recordCount;
 }
 
 CImage::~CImage()
@@ -15,21 +21,15 @@ CImage::~CImage()
 
 }
 
-void CImage::newInstance(Mat &newImage)
+void CImage::save(Mat image)
 {
-    this->image = newImage;
+    this->image = image;
+    cvtColor(image, image, CV_BGR2GRAY);
 
-    saveNewInstance();
+    imwrite("/etc/Scope/record" + to_string(this->recordCount) + "/image.jpeg", image);
 }
 
-void CImage::saveNewInstance()
-{
-    cvtColor(image,image,CV_BGR2GRAY);
-    /* save image in Rpi directory: "/etc" as "testCamera.jpeg" */
-    imwrite("/etc/testCamera.jpeg", image);
-}
-
-void *CImage::tDetectCharacter(void *ptr)
+void* CImage::tDetectCharacter(void *ptr)
 {
     while (1)
     {
@@ -37,7 +37,7 @@ void *CImage::tDetectCharacter(void *ptr)
     }
 }
 
-void *CImage::tRecognizeCharacter(void *ptr)
+void* CImage::tRecognizeCharacter(void *ptr)
 {
     while (1)
     {

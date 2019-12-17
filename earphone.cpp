@@ -9,12 +9,12 @@ CEarphone* CEarphone::getInstance()
     return instance;
 }
 
-CEarphone::CEarphone() : oAudio()
+CEarphone::CEarphone()
 {
 
 }
 
-void *CEarphone::tAdjustVolume(void *ptr)
+void* CEarphone::tAdjustVolume(void *ptr)
 {
     while (1)
     {

@@ -15,6 +15,7 @@
 #include <semaphore.h>
 #include "scope.h"
 #include "image.h"
+#include "audio.h"
 #include "camera.h"
 #include <vector>
 
@@ -22,7 +23,7 @@ using namespace std;
 
 pthread_t tAcquireImageID, tDetectCharacterID, tRecognizeCharacterID,
     tAssembleTextID, tGenerateAudioID, tAdjustVolumeID, tIdleID;
-sem_t semAcquireImage, semIncreaseVolume, semDecreaseVolume, semInterpretCharacter;
+sem_t semAcquireImage, semIncreaseVolume, semDecreaseVolume, semInterpretCharacter, semGenerateAudio;
 sem_t *semAccessAudio;
 pthread_mutex_t mutexCamera, mutexImage, mutexFrame, mutexCharacters, mutexText, mutexAudio,
     mutexIncrease, mutexDecrease, mutexAcquireDetect, mutexRecognizeAssemble,

@@ -7,6 +7,7 @@
 #include <unistd.h> //sleep
 #include <errno.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/fcntl.h>
@@ -34,7 +35,6 @@ private:
     void initConditionVariables();
     void initSignal();
     void initSharedMemory();
-    static void ISR(int);
     static void *tIdle(void*);
     void setupThread(int, pthread_attr_t *, struct sched_param *);
     bool initThreads();

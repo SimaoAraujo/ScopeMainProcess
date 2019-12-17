@@ -15,6 +15,7 @@ public:
 private:
     static CProcess *instance;
     static CRecord *oRecord;
+    vector<CRecord*> oRecords;
 
     CProcess();
     ~CProcess();

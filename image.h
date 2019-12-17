@@ -11,15 +11,17 @@ using namespace cv;
 class CImage
 {
 public:
-    CImage();
-    CImage(Mat*);
-    ~CImage();
-    void newInstance(Mat&);
-    void saveNewInstance();
-    static void *tDetectCharacter(void*);
-    static void *tRecognizeCharacter(void*);
+    static CImage* getInstance(int);
+    void save(Mat);
+    static void* tDetectCharacter(void*);
+    static void* tRecognizeCharacter(void*);
 private:
+    static CImage *instance;
     Mat image;
+    static int recordCount;
+
+    CImage(int);
+    ~CImage();
 };
 
 #endif

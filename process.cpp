@@ -9,13 +9,19 @@ CProcess* CProcess::getInstance()
     return instance;
 }
 
-CProcess::CProcess() /*oRecord()*/
+CProcess::CProcess()
 {
-    /* getCRecord(); */
+
+}
+
+CProcess::~CProcess()
+{
+
 }
 
 CRecord* CProcess::getCRecord()
 {
-    CRecord* oRecord = new CRecord();
+    CRecord *oRecord = new CRecord();
+    oRecords.push_back(oRecord);
     return oRecord;
 }

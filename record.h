@@ -14,6 +14,7 @@ class CRecord
 public:
     CRecord();
     ~CRecord();
+    int create();
     CImage* getCImage();
     CText* getCText();
     CAudio* getCAudio();
@@ -21,6 +22,7 @@ private:
     static CImage *oImage;
     static CText *oText;
     static CAudio *oAudio;
+    static int recordCount;
 };
 
 #endif

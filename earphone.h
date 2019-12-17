@@ -11,10 +11,10 @@ class CEarphone
 {
 public:
     static CEarphone* getInstance();
-    static void *tAdjustVolume(void*);
+    static void* tAdjustVolume(void*);
 private:
     static CEarphone *instance;
-    CAudio oAudio;
+    //CAudio oAudio;
 
     CEarphone();
     ~CEarphone();
