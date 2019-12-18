@@ -15,35 +15,14 @@
 
 #include "main.h"
 
-int main()
+int getDaemonPid()
 {
-    string inputName = "helloText";
-    string outputName = "helloText";
-
-    string mimic = "mimic --setf duration_strech=2 /etc/Scope/record0/" /*+ to_string(recordCount) + "/"*/ + inputName + ".txt -voice ap -o /etc/Scope/record0/" + outputName + ".wav";
-    cout << "CAudio::generate()" << endl;
-    system(mimic.c_str());
-
-    cout << "CAudio::generate()" << endl;
-
-    inputName = "decodedText";
-    outputName = "decodedText";
-
-    mimic = "mimic --setf duration_strech=1.2 /etc/Scope/record0/" /*+ to_string(recordCount) + "/"*/ + inputName + ".txt -voice ap -o /etc/Scope/record0/" + outputName + ".wav";
-    cout << "CAudio::generate()" << endl;
-    system(mimic.c_str());
-
-    cout << "CAudio::generate()" << endl;
-
-    CScope *Scope = CScope::getInstance();
-
-
     FILE *fp;
-    char path[10];
-    char aux[10];
+    char cmdInfo[10] = {};
+    char cPid[10] = {};
 
     /* Open the command for reading. */
-    fp = popen("ps -Af | grep /root/ScopeDaemonProcess", "r");
+    fp = popen("ps -Af | grep /etc/Scope/ScopeDaemonProcess", "r");
     if (fp == nullptr)
     {
         printf("Failed to run command\n" );
@@ -51,47 +30,114 @@ int main()
     }
 
     /* Read the output a line at a time - output it. */
-    fgets(path, sizeof(path), fp);
+    fgets(cmdInfo, sizeof(cmdInfo), fp);
 
     /* close */
     pclose(fp);
 
-    int i = -1;
-    while (path[++i] != ' ')
+    cout << cmdInfo << endl;
+
+    int firstPidIndex = 0;
+    while (cmdInfo[firstPidIndex] == ' ')
     {
-        aux[i] = path[i];
-        cout << path[i] << endl;
+        firstPidIndex++;
     }
-    int pid = atoi(aux);
-    cout << pid << endl;
+    cout << firstPidIndex << endl;
 
+    int cPidIndex = 0;
+    while (cmdInfo[firstPidIndex] != ' ')
+    {
+        cPid[cPidIndex] = cmdInfo[firstPidIndex];
+        cout << "cPid: " << cPid[cPidIndex] << endl;
+        cPidIndex++;
+        firstPidIndex++;
+    }
+    int pid = 0;
+    pid = atoi(cPid);
+    cout << "PID: "<< pid << endl;
+    return pid;
+}
 
-    string signal = "kill -s SIGHUP " + to_string(pid);
+void sendDaemonSignal()
+{
+    string signal = "kill -s SIGHUP " + to_string(getDaemonPid());
     system(signal.c_str());
+}
 
+struct buttonState
+{
+    char startButton;
+    char increaseVolumeButton;
+    char decreaseVolumeButton;
+};
 
-    char buffer[3]={0};
-    FILE* fd ;
-    fd = fopen ("/dev/buttons", "r" );
-    if(fd == nullptr)
+buttonState getButtonsState()
+{
+    char buttonsState[3] = {1, 1, 1};
+    struct buttonState bs = {1, 1, 1};
+    FILE* buttonsDeviceDriver;
+
+    buttonsDeviceDriver = fopen ("/dev/buttons", "r");
+    if(buttonsDeviceDriver != nullptr)
     {
-        printf ("Device doesn't exist\n");
-        return -1;
-    }
-    fread(buffer, sizeof(int), 3, fd);
-    printf ("Values on buffer: %s\n", buffer);
-    printf ("Values on buffer: %d\n", atoi(buffer));
-    fclose (fd);
+        fread(buttonsState, sizeof(int), 3, buttonsDeviceDriver);
+        fclose (buttonsDeviceDriver);
 
-    if(buffer[0] == '0')
-    {
-        cout << "button pressed!" << endl;
+        cout << "buttonsState = " << buttonsState << endl;
+        bs = {buttonsState[0], buttonsState[1], buttonsState[2]};
+        return bs;
     }
     else
-        cout << "no button pressed!!!!!!!11" << endl;
+    {
+        cout << "ERROR: can't open device." << endl;
+        return bs;
+    }
+}
 
-    if(!Scope->run())
-        cout << "ERROR: Threads unable to execute." << endl;
+void generateAudio(string inputName, string outputName)
+{
+    string mimic = "mimic --setf duration_strech=2 /etc/Scope/record0/" /*+ to_string(recordCount) + "/"*/ + inputName + ".txt -voice ap -o /etc/Scope/record0/" + outputName + ".wav";
+    system(mimic.c_str());
 
-    pthread_exit(nullptr);
+    cout << "generateAudio()" << endl;
+}
+
+int main()
+{
+    struct buttonState bs = {1, 1, 1};
+    CScope *Scope = CScope::getInstance();
+
+    string inputName = "helloText";
+    string outputName = "helloText";
+    generateAudio(inputName, outputName);
+
+    inputName = "decodedText";
+    outputName = "decodedText";
+    generateAudio(inputName, outputName);
+
+    sendDaemonSignal();
+
+    bs = getButtonsState();
+
+    if(bs.increaseVolumeButton == '0')
+    {
+        string amixerIncreseVolume = "amixer -c 0 set PCM 10db+";
+        system(amixerIncreseVolume.c_str());
+    }
+
+    if(bs.decreaseVolumeButton == '0')
+    {
+        string amixerDecreaseVolume = "amixer -c 0 set PCM 10db-";
+        system(amixerDecreaseVolume.c_str());
+    }
+
+    if(bs.startButton == '0')
+    {
+        if(!Scope->run())
+            cout << "ERROR: Threads unable to execute." << endl;
+
+        pthread_exit(nullptr);
+    }
+
+    return 0;
 }

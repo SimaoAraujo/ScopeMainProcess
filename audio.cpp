@@ -57,7 +57,7 @@ void* CAudio::tGenerateAudio(void *ptr)
         char aux[10];
 
         /* Open the command for reading. */
-        fp = popen("ps -Af | grep /root/ScopeDaemonProcess", "r");
+        fp = popen("ps -Af | grep /etc/Scope/ScopeDaemonProcess", "r");
         if (fp == nullptr)
         {
             printf("Failed to run command\n" );

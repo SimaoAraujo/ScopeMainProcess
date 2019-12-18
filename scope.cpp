@@ -91,7 +91,7 @@ void CScope::initSharedMemory()
     semAccessAudio = sem_open(semName, O_CREAT, 0644, 0);
     sem_close(semAccessAudio);
 
-    system("/root/ScopeDaemonProcess");
+    system("/etc/Scope/ScopeDaemonProcess");
 }
 
 void* CScope::tIdle(void *ptr)

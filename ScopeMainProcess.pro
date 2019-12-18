@@ -26,7 +26,7 @@ SOURCES += \
         scope.cpp \
         text.cpp
 
-target.path = /etc
+target.path = /etc/Scope
 INSTALLS += target
 
 HEADERS += \
