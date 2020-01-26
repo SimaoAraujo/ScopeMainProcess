@@ -25,8 +25,11 @@ void CImage::save(Mat image)
 {
     this->image = image;
     cvtColor(image, image, CV_BGR2GRAY);
+    threshold(image, image, 127, 255, THRESH_BINARY);
 
     imwrite("/etc/Scope/record" + to_string(this->recordCount) + "/image.jpeg", image);
+
+    cout << "image.jpeg saved." << endl;
 }
 
 void* CImage::tDetectCharacter(void *ptr)

@@ -15,6 +15,13 @@ class CCamera
 public:
     static CCamera* getInstance();
     static void* tAcquireImage(void*);
+
+
+
+
+
+
+    bool capture(int);
 private:
     static CCamera *instance;
     VideoCapture videoCapture;
@@ -23,7 +30,7 @@ private:
     CCamera();
     ~CCamera();
     void config(void);
-    bool capture(int);
+
 };
 
 #endif

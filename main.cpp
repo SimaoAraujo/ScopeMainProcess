@@ -104,40 +104,43 @@ void generateAudio(string inputName, string outputName)
 
 int main()
 {
-    struct buttonState bs = {1, 1, 1};
-    CScope *Scope = CScope::getInstance();
+//    struct buttonState bs = {1, 1, 1};
+//    CScope *Scope = CScope::getInstance();
 
-    string inputName = "helloText";
-    string outputName = "helloText";
-    generateAudio(inputName, outputName);
+//    string inputName = "helloText";
+//    string outputName = "helloText";
+//    generateAudio(inputName, outputName);
 
-    inputName = "decodedText";
-    outputName = "decodedText";
-    generateAudio(inputName, outputName);
+//    inputName = "decodedText";
+//    outputName = "decodedText";
+//    generateAudio(inputName, outputName);
 
-    sendDaemonSignal();
+//    sendDaemonSignal();
 
-    bs = getButtonsState();
+//    bs = getButtonsState();
 
-    if(bs.increaseVolumeButton == '0')
-    {
-        string amixerIncreseVolume = "amixer -c 0 set PCM 10db+";
-        system(amixerIncreseVolume.c_str());
-    }
+//    if(bs.increaseVolumeButton == '0')
+//    {
+//        string amixerIncreseVolume = "amixer -c 0 set PCM 10db+";
+//        system(amixerIncreseVolume.c_str());
+//    }
 
-    if(bs.decreaseVolumeButton == '0')
-    {
-        string amixerDecreaseVolume = "amixer -c 0 set PCM 10db-";
-        system(amixerDecreaseVolume.c_str());
-    }
+//    if(bs.decreaseVolumeButton == '0')
+//    {
+//        string amixerDecreaseVolume = "amixer -c 0 set PCM 10db-";
+//        system(amixerDecreaseVolume.c_str());
+//    }
 
-    if(bs.startButton == '0')
-    {
-        if(!Scope->run())
-            cout << "ERROR: Threads unable to execute." << endl;
+//    if(bs.startButton == '0')
+//    {
+//        if(!Scope->run())
+//            cout << "ERROR: Threads unable to execute." << endl;
 
-        pthread_exit(nullptr);
-    }
+//        pthread_exit(nullptr);
+//    }
+
+
+    CCamera::getInstance()->capture(0);
 
     return 0;
 }

@@ -33,7 +33,7 @@ bool CCamera::capture(int cameraId)
 {
     CRecord oRecord;
 
-    int recordCount = oRecord.create();
+    //int recordCount = oRecord.create();
     CImage *oImage = CImage::getInstance(0);
     Mat frame;
 
