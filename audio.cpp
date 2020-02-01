@@ -18,74 +18,78 @@ CAudio::CAudio(int recordCount)
 
 void CAudio::generate(string inputName, string outputName)
 {
-    string mimic = "mimic --setf duration_strech=1.2 /etc/Scope/record0/" /*+ to_string(recordCount) + "/"*/ + inputName + ".txt -voice ap -o /etc/Scope/record0/" + outputName + ".wav";
-    cout << "CAudio::generate()" << endl;
+    string mimic = "mimic --setf duration_strech=2 /etc/SCOPE/record0/" /*+ to_string(recordCount) + "/"*/ + inputName + ".txt -voice ap -o /etc/SCOPE/record0/" + outputName + ".wav";
     system(mimic.c_str());
 
     cout << "CAudio::generate()" << endl;
 }
 
+int CAudio::getDaemonPid()
+{
+    FILE *fp;
+    char cmdInfo[10] = {};
+    char cPid[10] = {};
+
+    /* Open the command for reading. */
+    fp = popen("ps -Af | grep /etc/SCOPE/ScopeDaemonProcess", "r");
+    if (fp == nullptr)
+    {
+        printf("Failed to run command\n" );
+        exit(1);
+    }
+
+    /* Read the output a line at a time - output it. */
+    fgets(cmdInfo, sizeof(cmdInfo), fp);
+
+    /* close */
+    pclose(fp);
+
+    cout << cmdInfo << endl;
+
+    int firstPidIndex = 0;
+    while (cmdInfo[firstPidIndex] == ' ')
+    {
+        firstPidIndex++;
+    }
+    cout << firstPidIndex << endl;
+
+    int cPidIndex = 0;
+    while (cmdInfo[firstPidIndex] != ' ')
+    {
+        cPid[cPidIndex] = cmdInfo[firstPidIndex];
+        cout << "cPid: " << cPid[cPidIndex] << endl;
+        cPidIndex++;
+        firstPidIndex++;
+    }
+    int pid = 0;
+    pid = atoi(cPid);
+    cout << "Daemon PID: "<< pid << endl;
+    return pid;
+}
+
+void CAudio::sendDaemonSignal(string sig)
+{
+    string signal = "kill -s " + sig + " " + to_string(getDaemonPid());
+    system(signal.c_str());
+}
+
 void* CAudio::tGenerateAudio(void *ptr)
 {
-    extern sem_t semUpdateSound, *semAccessAudio, semGenerateAudio;
-    extern pthread_mutex_t mutexAudio;
+    //extern sem_t *semAccessAudio;
+    extern sem_t semBusy;
+    extern pthread_cond_t condGenerateAudio;
+    extern pthread_mutex_t mutexGenerateAudio, mutexAudio;
 
-    string inputName = "helloText";
-    string outputName = "helloText";
-    string mimic = "mimic --setf duration_strech=2 /etc/Scope/record0/" /*+ to_string(recordCount) + "/"*/ + inputName + ".txt -voice ap -o /etc/Scope/record0/" + outputName + ".wav";
-    cout << "CAudio::generate()" << endl;
+    while(1)
+    {
+        pthread_cond_wait(&condGenerateAudio, &mutexGenerateAudio);
 
-
-        //sem_wait(&semGenerateAudio);
+        printf("audio\n");
         pthread_mutex_lock(&mutexAudio);
-        system(mimic.c_str());
+        CAudio::getInstance(0)->generate("text", "audio");
+        CAudio::getInstance(0)->sendDaemonSignal("SIGHUP");
         pthread_mutex_unlock(&mutexAudio);
-        cout << "CAudio::generate()" << endl;
 
-        inputName = "decodedText";
-        outputName = "decodedText";
-        mimic = "mimic --setf duration_strech=1.2 /etc/Scope/record0/" /*+ to_string(recordCount) + "/"*/ + inputName + ".txt -voice ap -o /etc/Scope/record0/" + outputName + ".wav";
-        cout << "CAudio::generate()" << endl;
-        pthread_mutex_lock(&mutexAudio);
-        system(mimic.c_str());
-        pthread_mutex_unlock(&mutexAudio);
-        cout << "CAudio::generate()" << endl;
-
-
-        FILE *fp;
-        char path[10];
-        char aux[10];
-
-        /* Open the command for reading. */
-        fp = popen("ps -Af | grep /etc/Scope/ScopeDaemonProcess", "r");
-        if (fp == nullptr)
-        {
-            printf("Failed to run command\n" );
-            exit(1);
-        }
-
-        /* Read the output a line at a time - output it. */
-        fgets(path, sizeof(path), fp);
-
-        /* close */
-        pclose(fp);
-
-        int i = 0;
-        while (path[++i] != ' ')
-        {
-            aux[i - 1] = path[i];
-            cout << path[i] << endl;
-        }
-        int pid = atoi(aux);
-        cout << pid << endl;
-
-
-        string signal = "kill -s SIGHUP " + to_string(pid);
-        system(signal.c_str());
-
-    //    CAudio::getInstance(0)->generate("decodedText", "decodedText");
-    //    CAudio::getInstance(0)->generate("helloText", "helloText");
-
-
-    pthread_exit(nullptr);
+        sem_post(&semBusy);
+    }
 }

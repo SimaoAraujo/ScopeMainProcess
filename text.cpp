@@ -23,7 +23,7 @@ CText::~CText()
 
 void CText::createFile(string name, string text)
 {
-    string create = "/etc/Scope/record" + to_string(0) + "/" + name + ".txt";
+    string create = "/etc/SCOPE/record" + to_string(0) + "/" + name + ".txt";
 
     ofstream outfile (create.c_str());
     outfile << text << endl;
@@ -32,17 +32,44 @@ void CText::createFile(string name, string text)
     cout << "CText::createFile()" << endl;
 }
 
+void CText::assemble()
+{
+    tesseract::TessBaseAPI *oTesseract = new tesseract::TessBaseAPI();
+    // Initialize tesseract-ocr with English, without specifying tessdata path
+    if (oTesseract->Init(NULL, "eng", OEM_LSTM_ONLY))
+    {
+        cout << "Could not initialize tesseract.\n" << endl;
+    }
+    oTesseract->SetPageSegMode(PSM_AUTO);
+
+    // Open input image with leptonica library
+    Mat image = imread("/etc/SCOPE/record0/image.jpeg");
+    oTesseract->SetImage(image.data, image.cols, image.rows, 3, image.step);
+    // Get OCR result
+    char* outText = oTesseract->GetUTF8Text();
+    createFile("text", outText);
+
+    // Destroy used object and release memory
+    oTesseract->End();
+    delete oTesseract;
+    delete [] outText;
+}
+
 void* CText::tAssembleText(void *ptr)
 {
-    extern sem_t semInterpretCharacter, semGenerateAudio;
-    string decodedText = "First decoded test.";
-    string helloText = "Hi, my name is SCOPE and i am your reading assistant. Press button to start decoding text.";
+    extern sem_t semAssembleText, semGenerateAudio;
+    extern pthread_cond_t condAssembleText, condGenerateAudio;
+    extern pthread_mutex_t mutexAssembleText, mutexGenerateAudio, mutexText;
 
-        //sem_wait(&semInterpretCharacter);
-        CText::getInstance(0)->createFile("helloText", helloText);
-        CText::getInstance(0)->createFile("decodedText", decodedText);
-        //sem_post(&semGenerateAudio);
+    while(1)
+    {
+        pthread_cond_wait(&condAssembleText, &mutexAssembleText);
 
+        printf("text\n");
+        pthread_mutex_lock(&mutexText);
+        CText::getInstance(0)->assemble();
+        pthread_mutex_unlock(&mutexText);
 
-    pthread_exit(nullptr);
+        pthread_cond_signal(&condGenerateAudio);
+    }
 }

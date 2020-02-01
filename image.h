@@ -13,8 +13,6 @@ class CImage
 public:
     static CImage* getInstance(int);
     void save(Mat);
-    static void* tDetectCharacter(void*);
-    static void* tRecognizeCharacter(void*);
 private:
     static CImage *instance;
     Mat image;

@@ -1,4 +1,10 @@
 #include "image.h"
+#include <opencv2/opencv.hpp>
+#include <algorithm>
+#include <string>
+#include <vector>
+using namespace cv;
+using namespace std;
 
 CImage* CImage::instance = nullptr;
 
@@ -25,25 +31,8 @@ void CImage::save(Mat image)
 {
     this->image = image;
     cvtColor(image, image, CV_BGR2GRAY);
-    threshold(image, image, 127, 255, THRESH_BINARY);
 
-    imwrite("/etc/Scope/record" + to_string(this->recordCount) + "/image.jpeg", image);
+    imwrite("/etc/SCOPE/record" + to_string(this->recordCount) + "/image.jpeg", image);
 
     cout << "image.jpeg saved." << endl;
-}
-
-void* CImage::tDetectCharacter(void *ptr)
-{
-    while (1)
-    {
-        cout << "Arrived at: tDetectCharacter" << endl;
-    }
-}
-
-void* CImage::tRecognizeCharacter(void *ptr)
-{
-    while (1)
-    {
-        cout << "Arrived at: tRecognizeCharacter" << endl;
-    }
 }

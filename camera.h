@@ -15,22 +15,17 @@ class CCamera
 public:
     static CCamera* getInstance();
     static void* tAcquireImage(void*);
-
-
-
-
-
-
     bool capture(int);
 private:
     static CCamera *instance;
-    VideoCapture videoCapture;
     vector<CImage*> oImages;
+    static VideoCapture* videoCapture;
 
     CCamera();
     ~CCamera();
     void config(void);
-
+    void killProcess();
+    int getCameraPid();
 };
 
 #endif

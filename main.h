@@ -21,12 +21,11 @@
 
 using namespace std;
 
-pthread_t tAcquireImageID, tDetectCharacterID, tRecognizeCharacterID,
-    tAssembleTextID, tGenerateAudioID, tAdjustVolumeID, tIdleID;
-sem_t semAcquireImage, semIncreaseVolume, semDecreaseVolume, semInterpretCharacter, semGenerateAudio;
-sem_t *semAccessAudio;
-pthread_mutex_t mutexCamera, mutexImage, mutexFrame, mutexCharacters, mutexText, mutexAudio,
-    mutexIncrease, mutexDecrease, mutexAcquireDetect, mutexRecognizeAssemble,
-    mutexAssembleGenerate;
+pthread_t tAcquireImageID, tAssembleTextID, tGenerateAudioID, tIncreaseVolumeID, tDecreaseVolumeID;
+sem_t semAcquireImage, semIncreaseVolume, semDecreaseVolume, semAssembleText, semGenerateAudio, semBusy;
+//sem_t *semAccessAudio;
+pthread_cond_t condAssembleText, condGenerateAudio;
+pthread_mutex_t mutexAssembleText, mutexGenerateAudio;
+pthread_mutex_t mutexCamera, mutexText, mutexAudio, mutexIncrease, mutexDecrease;
 
 #endif

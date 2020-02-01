@@ -12,32 +12,61 @@ CButton* CButton::getInstance()
 CButton::CButton()
 {
     cout << "CButton::CButton() Initiated!" << endl;
-    initSignal();
+}
+
+CButton::buttonState CButton::getButtonsState()
+{
+    char buttonsState[3] = {1, 1, 1};
+    bs = {1, 1, 1};
+    FILE* buttonsDeviceDriver;
+
+    buttonsDeviceDriver = fopen ("/dev/buttons", "r");
+    if(buttonsDeviceDriver != nullptr)
+    {
+        fread(buttonsState, sizeof(int), 3, buttonsDeviceDriver);
+        fclose (buttonsDeviceDriver);
+
+        //cout << "buttonsState = " << buttonsState << endl;
+        bs = {buttonsState[0], buttonsState[1], buttonsState[2]};
+        return bs;
+    }
+    else
+    {
+        cout << "ERROR: can't open device." << endl;
+        return bs;
+    }
 }
 
 void CButton::ISR(int signal)
 {
-    extern sem_t semAcquireImage, semIncreaseVolume, semDecreaseVolume;
+    extern sem_t semAcquireImage, semIncreaseVolume, semDecreaseVolume, semBusy;
+    static buttonState newButtonState, lastButtonState;
+    newButtonState = CButton::getInstance()->getButtonsState();
 
-    static int count = 0;
+
+    extern sem_t semAcquireImage, semIncreaseVolume, semDecreaseVolume, semAssembleText, semGenerateAudio;
+
+
 
     if(signal == SIGALRM)
     {
-        switch (++count)
+        if(newButtonState.increaseVolumeButton == '0' && lastButtonState.increaseVolumeButton != '0')
         {
-            case 1:
-                sem_post(&semAcquireImage);
-                break;
-            case 2:
-                sem_post(&semIncreaseVolume);
-                break;
-            case 3:
-                sem_post(&semDecreaseVolume);
-                break;
-            default:
-                count = 0;
-                break;
+            sem_post(&semIncreaseVolume);
+            cout << "button: +" << endl;
         }
+        else if(newButtonState.decreaseVolumeButton == '0' && lastButtonState.decreaseVolumeButton != '0')
+        {
+            sem_post(&semDecreaseVolume);
+            cout << "button: -" << endl;
+        }
+        else if(newButtonState.startButton == '0' && lastButtonState.startButton != '0')
+        {
+            sem_post(&semAcquireImage);
+            cout << "button: |>" << endl;
+        }
+
+        lastButtonState = newButtonState;
     }
 }
 
@@ -57,9 +86,6 @@ void CButton::initSignal()
     /* a SIGALRM is generated every 8ms */
     setitimer(ITIMER_REAL, &itv, nullptr);
 
-    /*********************** WHY???? *******************/
-
     cout << "CButton::initSignal() Initiated!" << endl;
-
     return;
 }

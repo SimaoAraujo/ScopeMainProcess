@@ -26,7 +26,7 @@ SOURCES += \
         scope.cpp \
         text.cpp
 
-target.path = /etc/Scope
+target.path = /etc/SCOPE
 INSTALLS += target
 
 HEADERS += \
@@ -45,4 +45,4 @@ QMAKE_CXXFLAGS += -std=c++0x -pthread -lasound
 LIBS += -pthread -lrt -lpthread -lbcm2835
 
 CONFIG += link_pkgconfig
-PKGCONFIG += opencv
+PKGCONFIG += opencv tesseract

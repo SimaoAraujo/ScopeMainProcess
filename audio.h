@@ -21,6 +21,7 @@ class CAudio
 public:
     static CAudio* getInstance(int);
     static void* tGenerateAudio(void*);
+    void sendDaemonSignal(string);
 private:
     static CAudio *instance;
     static int recordCount;
@@ -29,6 +30,7 @@ private:
     ~CAudio();
     string generateSound();
     void generate(string, string);
+    int getDaemonPid();
 };
 
 #endif

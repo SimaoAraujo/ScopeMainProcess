@@ -14,7 +14,7 @@ CRecord::~CRecord()
 
 int CRecord::create()
 {
-    string directory = "/etc/Scope/record";
+    string directory = "/etc/SCOPE/record";
     string createDirectory = "mkdir " + directory + to_string(recordCount);
     system(createDirectory.c_str());
 

@@ -1,4 +1,4 @@
-#ifndef CBUTTON_H
+﻿#ifndef CBUTTON_H
 #define CBUTTON_H
 
 #include <iostream>
@@ -18,14 +18,21 @@ using namespace std;
 
 class CButton
 {
-public:
-    static CButton* getInstance();
 private:
     static CButton *instance;
-
+    struct buttonState
+    {
+        char startButton;
+        char increaseVolumeButton;
+        char decreaseVolumeButton;
+    };
+    buttonState bs;
     CButton();
     ~CButton();
     static void ISR(int signal);
+public:
+    static CButton* getInstance();
+    buttonState getButtonsState();
     void initSignal();
 };
 
