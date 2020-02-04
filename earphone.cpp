@@ -23,9 +23,8 @@ void* CEarphone::tIncreaseVolume(void *ptr)
     while (1)
     {
         sem_wait(&semIncreaseVolume);
-        printf("increase\n");
         system(amixerIncreseVolume.c_str());
-        CAudio::getInstance(0)->sendDaemonSignal("SIGUSR2");
+        CProcess::getInstance()->sendDaemonSignal("SIGUSR2");
     }
 }
 
@@ -38,8 +37,7 @@ void* CEarphone::tDecreaseVolume(void *ptr)
     while (1)
     {
         sem_wait(&semDecreaseVolume);
-        printf("decrease\n");
         system(amixerDecreaseVolume.c_str());
-        CAudio::getInstance(0)->sendDaemonSignal("SIGUSR2");
+        CProcess::getInstance()->sendDaemonSignal("SIGUSR2");
     }
 }

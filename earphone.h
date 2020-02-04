@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include "audio.h"
+#include "process.h"
 
 using namespace std;
 
@@ -15,7 +16,6 @@ public:
     static void* tDecreaseVolume(void*);
 private:
     static CEarphone *instance;
-
     CEarphone();
     ~CEarphone();
 };

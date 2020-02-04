@@ -27,7 +27,6 @@ public:
     bool run();
 private:
     static CScope *instance;
-
     CScope();
     ~CScope();
     void initSemaphores();

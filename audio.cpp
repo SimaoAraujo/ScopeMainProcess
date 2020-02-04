@@ -2,26 +2,64 @@
 
 CAudio* CAudio::instance = nullptr;
 
-CAudio* CAudio::getInstance(int recordCount)
+CAudio* CAudio::getInstance()
 {
     if(!instance)
-        instance = new CAudio(recordCount);
+        instance = new CAudio();
     return instance;
 }
 
 int CAudio::recordCount = 0;
 
-CAudio::CAudio(int recordCount)
+CAudio::CAudio()
 {
-    CAudio::recordCount = recordCount;
+
+}
+
+int CAudio::getRecord()
+{
+    string sLastRecordCount;
+    int iLastRecordCount;
+
+    ifstream lastRecord_in("/etc/SCOPE/lastRecord.txt");
+    if(lastRecord_in.is_open())
+    {
+        getline(lastRecord_in, sLastRecordCount);
+        lastRecord_in.close();
+        iLastRecordCount = stoi(sLastRecordCount);
+        recordCount = iLastRecordCount;
+        return recordCount;
+    }
+    else
+    {
+        cout << "Unable to open file";
+    }
+}
+
+void CAudio::updateRecord()
+{
+    recordCount++;
+    string sLastRecordCount = to_string(recordCount);
+
+    ofstream lastRecord_out("/etc/SCOPE/lastRecord.txt", ofstream::out | ofstream::trunc);
+    if(lastRecord_out.is_open())
+    {
+        lastRecord_out << sLastRecordCount;
+        lastRecord_out.close();
+    }
+    else
+    {
+        cout << "Unable to open file";
+    }
 }
 
 void CAudio::generate(string inputName, string outputName)
 {
-    string mimic = "mimic --setf duration_strech=2 /etc/SCOPE/record0/" /*+ to_string(recordCount) + "/"*/ + inputName + ".txt -voice ap -o /etc/SCOPE/record0/" + outputName + ".wav";
+    getRecord();
+    string mimic = "mimic --setf duration_strech=2 /etc/SCOPE/records/record" + to_string(recordCount) + "/" + inputName + ".txt -voice ap -o /etc/SCOPE/records/record" + to_string(recordCount) + "/" + outputName + ".wav";
     system(mimic.c_str());
 
-    cout << "CAudio::generate()" << endl;
+    updateRecord();
 }
 
 int CAudio::getDaemonPid()
@@ -51,13 +89,11 @@ int CAudio::getDaemonPid()
     {
         firstPidIndex++;
     }
-    cout << firstPidIndex << endl;
 
     int cPidIndex = 0;
     while (cmdInfo[firstPidIndex] != ' ')
     {
         cPid[cPidIndex] = cmdInfo[firstPidIndex];
-        cout << "cPid: " << cPid[cPidIndex] << endl;
         cPidIndex++;
         firstPidIndex++;
     }
@@ -75,21 +111,25 @@ void CAudio::sendDaemonSignal(string sig)
 
 void* CAudio::tGenerateAudio(void *ptr)
 {
-    //extern sem_t *semAccessAudio;
     extern sem_t semBusy;
     extern pthread_cond_t condGenerateAudio;
     extern pthread_mutex_t mutexGenerateAudio, mutexAudio;
+    extern bool busy;
+    extern pthread_mutex_t mutexBusy;
 
     while(1)
     {
+        pthread_mutex_lock(&mutexGenerateAudio);
         pthread_cond_wait(&condGenerateAudio, &mutexGenerateAudio);
+        pthread_mutex_unlock(&mutexGenerateAudio);
 
-        printf("audio\n");
         pthread_mutex_lock(&mutexAudio);
-        CAudio::getInstance(0)->generate("text", "audio");
-        CAudio::getInstance(0)->sendDaemonSignal("SIGHUP");
+        CAudio::getInstance()->generate("text", "audio");
+        CAudio::getInstance()->sendDaemonSignal("SIGHUP");
         pthread_mutex_unlock(&mutexAudio);
 
-        sem_post(&semBusy);
+        pthread_mutex_lock(&mutexBusy);
+        busy = false;
+        pthread_mutex_unlock(&mutexBusy);
     }
 }

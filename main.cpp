@@ -1,15 +1,15 @@
 /*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.* SCOPE *.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*\
  *                                                                                                       *
- *                              Realized by Samuel Pereira and Simão Araújo                              *
+ *                                  Made by Samuel Pereira and Simão Araújo                              *
  *                                                                                                       *
  *                                           Project Features:                                           *
  *                                                                                                       *
- *                    Produce sound based on patterns that are made in a touch matrix                    *
- *                                  React to some hands slide gestures                                   *
- *                Show a pattern in a matrix of leds, created by the user in touch inputs                *
- *                                   Detect pattern from touch matrix                                    *
- *                      Create a musical effect according with the matrix pattern                        *
- *                                            Produce melody                                             *
+ *                                Capture images from a camera and save it                               *
+ *                                    Detect Text in the images taken                                    *
+ *                                Recognize the detected text and save it                                *
+ *                                 Convert the recognized text into audio                                *
+ *                     Reproduce the audio converted from the text detected in the image                 *
+ *                                          Adjust the sound level                                       *
  *                                                                                                       *
 \*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*/
 
@@ -23,9 +23,4 @@ int main()
         cout << "ERROR: Threads unable to execute." << endl;
 
     pthread_exit(nullptr);
-
-//    CCamera::getInstance()->capture(0);
-//    CText::getInstance(0)->assembleText();
-//    generateAudio("text", "audio");
-//    sendDaemonSignal();
 }

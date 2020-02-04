@@ -2,18 +2,18 @@
 
 CText* CText::instance = nullptr;
 
-CText* CText::getInstance(int recordCount)
+CText* CText::getInstance()
 {
     if(!instance)
-        instance = new CText(recordCount);
+        instance = new CText();
     return instance;
 }
 
 int CText::recordCount = 0;
 
-CText::CText(int recordCount)
+CText::CText()
 {
-    CText::recordCount = recordCount;
+
 }
 
 CText::~CText()
@@ -21,9 +21,29 @@ CText::~CText()
 
 }
 
+int CText::getRecord()
+{
+    string sLastRecordCount;
+    int iLastRecordCount;
+
+    ifstream lastRecord_in("/etc/SCOPE/lastRecord.txt");
+    if(lastRecord_in.is_open())
+    {
+        getline(lastRecord_in, sLastRecordCount);
+        lastRecord_in.close();
+        iLastRecordCount = stoi(sLastRecordCount);
+        recordCount = iLastRecordCount;
+        return recordCount;
+    }
+    else
+    {
+        cout << "Unable to open file";
+    }
+}
+
 void CText::createFile(string name, string text)
 {
-    string create = "/etc/SCOPE/record" + to_string(0) + "/" + name + ".txt";
+    string create = "/etc/SCOPE/records/record" + to_string(recordCount) + "/" + name + ".txt";
 
     ofstream outfile (create.c_str());
     outfile << text << endl;
@@ -42,8 +62,9 @@ void CText::assemble()
     }
     oTesseract->SetPageSegMode(PSM_AUTO);
 
-    // Open input image with leptonica library
-    Mat image = imread("/etc/SCOPE/record0/image.jpeg");
+    getRecord();
+    // Open input image with opencv library
+    Mat image = imread("/etc/SCOPE/records/record" + to_string(recordCount) + "/image.jpeg");
     oTesseract->SetImage(image.data, image.cols, image.rows, 3, image.step);
     // Get OCR result
     char* outText = oTesseract->GetUTF8Text();
@@ -63,13 +84,16 @@ void* CText::tAssembleText(void *ptr)
 
     while(1)
     {
+        pthread_mutex_lock(&mutexAssembleText);
         pthread_cond_wait(&condAssembleText, &mutexAssembleText);
+        pthread_mutex_unlock(&mutexAssembleText);
 
-        printf("text\n");
         pthread_mutex_lock(&mutexText);
-        CText::getInstance(0)->assemble();
+        CText::getInstance()->assemble();
         pthread_mutex_unlock(&mutexText);
 
+        pthread_mutex_lock(&mutexGenerateAudio);
         pthread_cond_signal(&condGenerateAudio);
+        pthread_mutex_unlock(&mutexGenerateAudio);
     }
 }

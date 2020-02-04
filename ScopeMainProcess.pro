@@ -35,6 +35,7 @@ HEADERS += \
     camera.h \
     earphone.h \
     image.h \
+    image.h \
     main.h \
     process.h \
     record.h \

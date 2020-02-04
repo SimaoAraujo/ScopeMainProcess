@@ -12,17 +12,21 @@ using namespace std;
 class CRecord
 {
 public:
-    CRecord();
-    ~CRecord();
-    int create();
+    static CRecord* getInstance();
+    void createRecord();
+    void create();
     CImage* getCImage();
     CText* getCText();
     CAudio* getCAudio();
+    int getRecord();
 private:
     static CImage *oImage;
     static CText *oText;
     static CAudio *oAudio;
     static int recordCount;
+    static CRecord *instance;
+    CRecord();
+    ~CRecord();
 };
 
 #endif

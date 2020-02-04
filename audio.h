@@ -12,25 +12,27 @@
 #include <sys/stat.h>
 #include <sys/fcntl.h>
 #include <iostream>
+#include <fstream>
 #include <string>
+#include <sstream>
 
 using namespace std;
 
 class CAudio
 {
 public:
-    static CAudio* getInstance(int);
+    static CAudio* getInstance();
     static void* tGenerateAudio(void*);
-    void sendDaemonSignal(string);
+    void sendDaemonSignal(string sig);
 private:
     static CAudio *instance;
     static int recordCount;
-
-    CAudio(int);
+    CAudio();
     ~CAudio();
-    string generateSound();
     void generate(string, string);
     int getDaemonPid();
+    int getRecord();
+    void updateRecord();
 };
 
 #endif

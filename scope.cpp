@@ -14,7 +14,6 @@ CScope::CScope()
     initSemaphores();
     initMutexes();
     initConditionVariables();
-    //initSharedMemory();
 
     system("/etc/SCOPE/ScopeDaemonProcess");
     CButton::getInstance()->initSignal();
@@ -22,71 +21,58 @@ CScope::CScope()
 
 CScope::~CScope()
 {
-    extern sem_t semAcquireImage, semAssembleText, semIncreaseVolume, semDecreaseVolume, semGenerateAudio, semBusy;
-    //extern sem_t *semAccessAudio;
-    extern pthread_cond_t condAssembleText, condGenerateAudio;
-    extern pthread_mutex_t mutexCamera, mutexText, mutexAudio, mutexIncrease, mutexDecrease;
+    extern sem_t semIncreaseVolume, semDecreaseVolume;
+    extern pthread_cond_t condAcquireImage, condAssembleText, condGenerateAudio;
+    extern pthread_mutex_t mutexAcquireImage, mutexAssembleText, mutexGenerateAudio;
+    extern pthread_mutex_t mutexCamera, mutexText, mutexAudio, mutexIncrease, mutexDecrease, mutexBusy;
 
-    sem_destroy(&semAcquireImage);
     sem_destroy(&semIncreaseVolume);
     sem_destroy(&semDecreaseVolume);
-    sem_destroy(&semBusy);
-//    sem_destroy(&semAssembleText);
-//    sem_destroy(&semGenerateAudio);
-//    sem_destroy(semAccessAudio);
     pthread_mutex_destroy(&mutexCamera);
     pthread_mutex_destroy(&mutexText);
     pthread_mutex_destroy(&mutexAudio);
-//    pthread_mutex_destroy(&mutexIncrease);
-//    pthread_mutex_destroy(&mutexDecrease);
+    pthread_mutex_destroy(&mutexIncrease);
+    pthread_mutex_destroy(&mutexDecrease);
+    pthread_mutex_destroy(&mutexBusy);
+    pthread_cond_destroy(&condAcquireImage);
     pthread_cond_destroy(&condAssembleText);
     pthread_cond_destroy(&condGenerateAudio);
+    pthread_mutex_destroy(&mutexAcquireImage);
+    pthread_mutex_destroy(&mutexAssembleText);
+    pthread_mutex_destroy(&mutexGenerateAudio);
 }
 
 void CScope::initSemaphores()
 {
-    extern sem_t semAcquireImage, semIncreaseVolume, semDecreaseVolume, semAssembleText, semGenerateAudio, semBusy;
+    extern sem_t semIncreaseVolume, semDecreaseVolume;
 
-    sem_init(&semAcquireImage, 0, 0);
     sem_init(&semIncreaseVolume, 0, 0);
     sem_init(&semDecreaseVolume, 0, 0);
-    sem_init(&semBusy, 0, 1);
-//    sem_init(&semAssembleText, 0 , 0);
-//    sem_init(&semGenerateAudio, 0 , 0);
 }
 
 void CScope::initMutexes()
 {
-    extern pthread_mutex_t mutexCamera, mutexText, mutexAudio, mutexIncrease, mutexDecrease;
+    extern pthread_mutex_t mutexCamera, mutexText, mutexAudio, mutexIncrease, mutexDecrease, mutexBusy;
 
     mutexCamera = PTHREAD_MUTEX_INITIALIZER;
     mutexText = PTHREAD_MUTEX_INITIALIZER;
     mutexAudio = PTHREAD_MUTEX_INITIALIZER;
     mutexIncrease = PTHREAD_MUTEX_INITIALIZER;
     mutexDecrease = PTHREAD_MUTEX_INITIALIZER;
+    mutexBusy = PTHREAD_MUTEX_INITIALIZER;
 }
 
 void CScope::initConditionVariables()
 {
-    extern pthread_cond_t condAssembleText, condGenerateAudio;
-    extern pthread_mutex_t mutexAssembleText, mutexGenerateAudio;
+    extern pthread_cond_t condAcquireImage, condAssembleText, condGenerateAudio;
+    extern pthread_mutex_t mutexAcquireImage, mutexAssembleText, mutexGenerateAudio;
 
+    condAcquireImage = PTHREAD_COND_INITIALIZER;
+    mutexAcquireImage = PTHREAD_MUTEX_INITIALIZER;
     condAssembleText = PTHREAD_COND_INITIALIZER;
     mutexAssembleText = PTHREAD_MUTEX_INITIALIZER;
     condGenerateAudio = PTHREAD_COND_INITIALIZER;
     mutexGenerateAudio = PTHREAD_MUTEX_INITIALIZER;
-}
-
-void CScope::initSharedMemory()
-{
-//    extern sem_t *semAccessAudio;
-
-//    char shmName[] = "shmDaemon";
-//    char semName[] = "semDaemon";
-
-//    shm_open(shmName, O_CREAT|O_RDWR|O_TRUNC, S_IRWXU|S_IRWXG);
-//    semAccessAudio = sem_open(semName, O_CREAT, 0644, 0);
-//    sem_close(semAccessAudio);
 }
 
 void CScope::setupThread(int priority, pthread_attr_t *pthread_attr, sched_param *pthread_param)

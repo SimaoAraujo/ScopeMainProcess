@@ -1,4 +1,4 @@
-#include "camera.h"
+﻿#include "camera.h"
 
 CCamera* CCamera::instance = nullptr;
 
@@ -10,6 +10,8 @@ CCamera* CCamera::getInstance()
         instance = new CCamera();
     return instance;
 }
+
+int CCamera::recordCount = 0;
 
 CCamera::CCamera()
 {
@@ -24,7 +26,6 @@ CCamera::~CCamera()
 void CCamera::config()
 {
     if(!videoCapture){
-        cout << endl << "video capture!!!!!" << endl << endl;
         videoCapture = new VideoCapture;
     }
     videoCapture->set(CV_CAP_PROP_FRAME_WIDTH, 640);
@@ -35,68 +36,11 @@ void CCamera::config()
     videoCapture->set(CV_CAP_PROP_SATURATION, 100);
 }
 
-int CCamera::getCameraPid()
-{
-    FILE *fp;
-    char cmdInfo[10] = {};
-    char cPid[10] = {};
-
-    /* Open the command for reading. */
-    fp = popen("fuser /dev/video0", "r");
-    if (fp == nullptr)
-    {
-        printf("Failed to run command\n" );
-        exit(1);
-    }
-
-    /* Read the output a line at a time - output it. */
-    fgets(cmdInfo, sizeof(cmdInfo), fp);
-
-    /* close */
-    pclose(fp);
-
-    cout << cmdInfo << endl;
-
-//    int firstPidIndex = 0;
-//    while (cmdInfo[firstPidIndex] == ' ')
-//    {
-//        firstPidIndex++;
-//    }
-//    cout << firstPidIndex << endl;
-
-//    int cPidIndex = 0;
-//    if()
-//        while (cmdInfo[firstPidIndex] != ' ')
-//        {
-//            cPid[cPidIndex] = cmdInfo[firstPidIndex];
-//            cout << "cPid: " << cPid[cPidIndex] << endl;
-//            cPidIndex++;
-//            firstPidIndex++;
-//        }
-    int pid = 0;
-    pid = atoi(cmdInfo);
-    cout << "Camera PID: "<< pid << endl;
-    return pid;
-}
-
-void CCamera::killProcess()
-{
-    if(getCameraPid() != 0)
-    {
-        string signal = "kill " + to_string(getCameraPid());
-        system(signal.c_str());
-    }
-}
-
 bool CCamera::capture(int cameraId)
 {
-    CRecord oRecord;
     Mat frame;
-
-    //killProcess();
-
-    CImage *oImage = CImage::getInstance(0);
-    oImages.push_back(oImage);
+    CRecord::getInstance()->getRecord();
+    CImage *oImage = CImage::getInstance();
 
     videoCapture->release();
     if(!videoCapture->isOpened())
@@ -124,20 +68,28 @@ bool CCamera::capture(int cameraId)
 void* CCamera::tAcquireImage(void *ptr)
 {
     extern sem_t semAcquireImage;
-    extern pthread_cond_t condAssembleText;
-    extern pthread_mutex_t mutexCamera;
+    extern pthread_cond_t condAcquireImage, condAssembleText;
+    extern pthread_mutex_t mutexAcquireImage, mutexCamera, mutexAssembleText;
+    extern bool busy;
+    extern pthread_mutex_t mutexBusy;
 
     while(1)
     {
-        sem_wait(&semAcquireImage);
+        pthread_mutex_lock(&mutexAcquireImage);
+        pthread_cond_wait(&condAcquireImage, &mutexAcquireImage);
+        pthread_mutex_unlock(&mutexAcquireImage);
+        pthread_mutex_lock(&mutexBusy);
+        busy = true;
+        pthread_mutex_unlock(&mutexBusy);
 
-        printf("acquire\n");
         pthread_mutex_lock(&mutexCamera);
-        CAudio::getInstance(0)->sendDaemonSignal("SIGUSR1");
+        CProcess::getInstance()->sendDaemonSignal("SIGUSR1");
         CCamera::getInstance()->config();
         CCamera::getInstance()->capture(0);
         pthread_mutex_unlock(&mutexCamera);
 
+        pthread_mutex_lock(&mutexAssembleText);
         pthread_cond_signal(&condAssembleText);
+        pthread_mutex_unlock(&mutexAssembleText);
     }
 }

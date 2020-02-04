@@ -1,7 +1,15 @@
 /*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.* SCOPE *.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*\
  *                                                                                                       *
- *                              Realized by Samuel Pereira and Simão Araújo                              *
+ *                                  Made by Samuel Pereira and Simão Araújo                              *
  *                                                                                                       *
+ *                                           Project Features:                                           *
+ *                                                                                                       *
+ *                                Capture images from a camera and save it                               *
+ *                                    Detect Text in the images taken                                    *
+ *                                Recognize the detected text and save it                                *
+ *                                 Convert the recognized text into audio                                *
+ *                     Reproduce the audio converted from the text detected in the image                 *
+ *                                          Adjust the sound level                                       *
  *                                                                                                       *
 \*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*/
 
@@ -22,10 +30,11 @@
 using namespace std;
 
 pthread_t tAcquireImageID, tAssembleTextID, tGenerateAudioID, tIncreaseVolumeID, tDecreaseVolumeID;
-sem_t semAcquireImage, semIncreaseVolume, semDecreaseVolume, semAssembleText, semGenerateAudio, semBusy;
-//sem_t *semAccessAudio;
-pthread_cond_t condAssembleText, condGenerateAudio;
-pthread_mutex_t mutexAssembleText, mutexGenerateAudio;
+sem_t semIncreaseVolume, semDecreaseVolume;
+pthread_cond_t condAcquireImage, condAssembleText, condGenerateAudio;
+pthread_mutex_t mutexAcquireImage, mutexAssembleText, mutexGenerateAudio;
 pthread_mutex_t mutexCamera, mutexText, mutexAudio, mutexIncrease, mutexDecrease;
+bool busy = false;
+pthread_mutex_t mutexBusy;
 
 #endif

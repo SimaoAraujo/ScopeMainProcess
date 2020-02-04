@@ -11,7 +11,7 @@ CButton* CButton::getInstance()
 
 CButton::CButton()
 {
-    cout << "CButton::CButton() Initiated!" << endl;
+
 }
 
 CButton::buttonState CButton::getButtonsState()
@@ -26,7 +26,6 @@ CButton::buttonState CButton::getButtonsState()
         fread(buttonsState, sizeof(int), 3, buttonsDeviceDriver);
         fclose (buttonsDeviceDriver);
 
-        //cout << "buttonsState = " << buttonsState << endl;
         bs = {buttonsState[0], buttonsState[1], buttonsState[2]};
         return bs;
     }
@@ -39,14 +38,13 @@ CButton::buttonState CButton::getButtonsState()
 
 void CButton::ISR(int signal)
 {
-    extern sem_t semAcquireImage, semIncreaseVolume, semDecreaseVolume, semBusy;
+    extern sem_t semAcquireImage, semIncreaseVolume, semDecreaseVolume;
+    extern pthread_cond_t condAcquireImage;
+    extern pthread_mutex_t mutexAcquireImage;
+    extern bool busy;
+    extern pthread_mutex_t mutexBusy;
     static buttonState newButtonState, lastButtonState;
     newButtonState = CButton::getInstance()->getButtonsState();
-
-
-    extern sem_t semAcquireImage, semIncreaseVolume, semDecreaseVolume, semAssembleText, semGenerateAudio;
-
-
 
     if(signal == SIGALRM)
     {
@@ -60,10 +58,19 @@ void CButton::ISR(int signal)
             sem_post(&semDecreaseVolume);
             cout << "button: -" << endl;
         }
-        else if(newButtonState.startButton == '0' && lastButtonState.startButton != '0')
+        else if(newButtonState.startButton == '0' && lastButtonState.startButton != '0' && busy == false)
         {
-            sem_post(&semAcquireImage);
+            CRecord::getInstance()->createRecord();
+            pthread_mutex_lock(&mutexAcquireImage);
+            pthread_cond_signal(&condAcquireImage);
+            pthread_mutex_unlock(&mutexAcquireImage);
             cout << "button: |>" << endl;
+        }
+        else if (newButtonState.startButton == '0' && lastButtonState.startButton != '0' && busy == true)
+        {
+            pthread_mutex_lock(&mutexBusy);
+            CProcess::getInstance()->sendDaemonSignal("SIGTTIN");
+            pthread_mutex_unlock(&mutexBusy);
         }
 
         lastButtonState = newButtonState;

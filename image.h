@@ -2,6 +2,7 @@
 #define CIMAGE_H
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <opencv2/opencv.hpp>
 
@@ -11,15 +12,15 @@ using namespace cv;
 class CImage
 {
 public:
-    static CImage* getInstance(int);
+    static CImage* getInstance();
     void save(Mat);
 private:
     static CImage *instance;
     Mat image;
     static int recordCount;
-
-    CImage(int);
+    CImage();
     ~CImage();
+    int getRecord();
 };
 
 #endif

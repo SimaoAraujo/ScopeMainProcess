@@ -6,6 +6,7 @@
 #include <opencv2/opencv.hpp>
 #include "image.h"
 #include "record.h"
+#include "process.h"
 
 using namespace std;
 using namespace cv;
@@ -20,12 +21,10 @@ private:
     static CCamera *instance;
     vector<CImage*> oImages;
     static VideoCapture* videoCapture;
-
+    static int recordCount;
     CCamera();
     ~CCamera();
     void config(void);
-    void killProcess();
-    int getCameraPid();
 };
 
 #endif

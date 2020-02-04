@@ -16,17 +16,17 @@ using namespace tesseract;
 class CText
 {
 public:
-    static CText* getInstance(int);
+    static CText* getInstance();
     static void* tAssembleText(void*);
 
 private:
     static CText *instance;
     static int recordCount;
-
-    CText(int);
+    CText();
     ~CText();
     void createFile(string, string);
     void assemble();
+    int getRecord();
 };
 
 #endif

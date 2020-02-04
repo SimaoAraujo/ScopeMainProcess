@@ -13,6 +13,8 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/fcntl.h>
+#include "record.h"
+#include "process.h"
 
 using namespace std;
 
@@ -29,10 +31,10 @@ private:
     buttonState bs;
     CButton();
     ~CButton();
+    buttonState getButtonsState();
     static void ISR(int signal);
 public:
     static CButton* getInstance();
-    buttonState getButtonsState();
     void initSignal();
 };
 
